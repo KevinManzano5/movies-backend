@@ -5,6 +5,7 @@ import (
 	"movies-backend/core/models"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -90,4 +91,37 @@ func GetReviews(pool *pgxpool.Pool) ([]models.Review, error) {
 	}
 
 	return reviews, nil
+}
+
+func GetReview(pool *pgxpool.Pool, id uuid.UUID) (*models.Review, error) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	var query string = `
+			SELECT id, movie, title, rating, review, created_at, updated_at
+			FROM reviews
+			WHERE id = $1
+	`
+
+	var review models.Review
+
+	var err error = pool.QueryRow(ctx, query, id).Scan(
+		&review.Id,
+		&review.Movie,
+		&review.Title,
+		&review.Rating,
+		&review.Review,
+		&review.CreatedAt,
+		&review.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &review, nil
 }

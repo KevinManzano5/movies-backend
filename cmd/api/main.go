@@ -52,6 +52,7 @@ func main() {
 
 	router.POST("/reviews", handlers.CreateReviewHandler(pool))
 	router.GET("/reviews", handlers.GetReviewsHandler(pool))
+	router.GET("/reviews/:id", handlers.GetReviewHandler(pool))
 
 	router.Run(":" + cfg.PORT)
 }
