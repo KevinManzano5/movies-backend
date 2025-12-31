@@ -40,3 +40,54 @@ func CreateReview(pool *pgxpool.Pool, movie string, title string, rating int, re
 
 	return &review, nil
 }
+
+func GetReviews(pool *pgxpool.Pool) ([]models.Review, error) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	var query string = `
+		SELECT id, movie, title, rating, review, created_at, updated_at
+		FROM reviews
+		ORDER BY created_at DESC
+	`
+
+	var rows, err = pool.Query(ctx, query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var reviews []models.Review = []models.Review{}
+
+	for rows.Next() {
+		var review models.Review
+
+		err := rows.Scan(
+			&review.Id,
+			&review.Movie,
+			&review.Title,
+			&review.Rating,
+			&review.Review,
+			&review.CreatedAt,
+			&review.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		reviews = append(reviews, review)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return reviews, nil
+}

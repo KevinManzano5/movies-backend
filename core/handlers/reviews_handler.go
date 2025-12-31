@@ -40,3 +40,19 @@ func CreateReviewHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 		c.JSON(http.StatusCreated, review)
 	}
 }
+
+func GetReviewsHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		reviews, err := repository.GetReviews(pool)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusOK, reviews)
+	}
+}
