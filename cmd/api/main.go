@@ -54,6 +54,7 @@ func main() {
 	router.GET("/reviews", handlers.GetReviewsHandler(pool))
 	router.GET("/reviews/:id", handlers.GetReviewHandler(pool))
 	router.PATCH("/reviews/:id", handlers.UpdateReviewHandler(pool))
+	router.DELETE("/reviews/:id", handlers.DeleteReviewHandler(pool))
 
 	router.Run(":" + cfg.PORT)
 }

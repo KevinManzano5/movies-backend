@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"movies-backend/core/models"
 	"time"
 
@@ -163,4 +164,30 @@ func UpdateReview(pool *pgxpool.Pool, id uuid.UUID, movie *string, title *string
 	}
 
 	return &review, nil
+}
+
+func DeleteReview(pool *pgxpool.Pool, id uuid.UUID) error {
+	var ctx context.Context
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	var query = `
+		DELETE FROM reviews
+		WHERE id = $1
+	`
+
+	var commandTag, err = pool.Exec(ctx, query, id)
+
+	if err != nil {
+		return err
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return fmt.Errorf("Review with id %v not found", id)
+	}
+
+	return nil
 }

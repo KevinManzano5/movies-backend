@@ -159,3 +159,39 @@ func UpdateReviewHandler(pool *pgxpool.Pool) gin.HandlerFunc {
 		})
 	}
 }
+
+func DeleteReviewHandler(pool *pgxpool.Pool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		idString := c.Param("id")
+
+		id, err := uuid.Parse(idString)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid review id",
+			})
+
+			return
+		}
+
+		err = repository.DeleteReview(pool, id)
+
+		if err != nil {
+			if err.Error() == "Review with id "+idString+" not found" {
+				c.JSON(http.StatusNotFound, gin.H{
+					"error": err.Error(),
+				})
+
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusNoContent, gin.H{})
+	}
+}
