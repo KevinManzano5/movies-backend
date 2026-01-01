@@ -125,3 +125,42 @@ func GetReview(pool *pgxpool.Pool, id uuid.UUID) (*models.Review, error) {
 
 	return &review, nil
 }
+
+func UpdateReview(pool *pgxpool.Pool, id uuid.UUID, movie *string, title *string, rating *int, reviewText *string) (*models.Review, error) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+
+	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	var query string = `
+		UPDATE reviews
+		SET 
+			movie  = COALESCE($2, movie),
+			title  = COALESCE($3, title), 
+			rating = COALESCE($4, rating), 
+			review = COALESCE($5, review), 
+			updated_at = NOW()
+		WHERE id = $1
+		RETURNING *;
+	`
+
+	var review models.Review
+
+	var err error = pool.QueryRow(ctx, query, id, movie, title, rating, reviewText).Scan(
+		&review.Id,
+		&review.Movie,
+		&review.Title,
+		&review.Rating,
+		&review.Review,
+		&review.CreatedAt,
+		&review.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &review, nil
+}
