@@ -4,11 +4,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	GIN_MODE          string
+	ENV               string
 	DATABASE_URL      string
 	DATABASE_HOST     string
 	DATABASE_PORT     string
@@ -28,8 +29,7 @@ func Load() (*Config, error) {
 	}
 
 	var config *Config = &Config{
-		GIN_MODE:          os.Getenv("GIN_MODE"),
-		DATABASE_URL:      os.Getenv("DATABASE_URL"),
+		ENV:               os.Getenv("ENV"),
 		DATABASE_HOST:     os.Getenv("DATABASE_HOST"),
 		DATABASE_PORT:     os.Getenv("DATABASE_PORT"),
 		DATABASE_USER:     os.Getenv("DATABASE_USER"),
@@ -39,4 +39,25 @@ func Load() (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func MustLoadConfig() *Config {
+	cfg, err := Load()
+
+	if err != nil {
+		log.Fatal("Failed to load configuration:", err)
+	}
+
+	return cfg
+}
+
+func SetGinMode(env string) {
+	switch env {
+	case "production":
+		gin.SetMode(gin.ReleaseMode)
+	case "staging":
+		gin.SetMode(gin.TestMode)
+	default:
+		gin.SetMode(gin.DebugMode)
+	}
 }

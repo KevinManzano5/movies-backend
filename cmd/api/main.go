@@ -1,67 +1,54 @@
 package main
 
 import (
+	"context"
 	"log"
 	"movies-backend/core/config"
 	"movies-backend/core/database"
-	"movies-backend/core/handlers"
+	"movies-backend/core/router"
+	"net/http"
 	"os"
-
-	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	var cfg *config.Config
-	var err error
-	cfg, err = config.Load()
+	cfg := config.MustLoadConfig()
 
-	if err != nil {
-		log.Fatal("Failed to load configuration: ", err)
-	}
+	config.SetGinMode(cfg.ENV)
 
-	var pool *pgxpool.Pool
-
-	pool, err = database.Connect(database.DatabaseCredentials{
-		DATABASE_HOST:     cfg.DATABASE_HOST,
-		DATABASE_PORT:     cfg.DATABASE_PORT,
-		DATABASE_USER:     cfg.DATABASE_USER,
-		DATABASE_PASSWORD: cfg.DATABASE_PASSWORD,
-		DATABASE_NAME:     cfg.DATABASE_NAME,
-	})
-
-	if err != nil {
-		log.Fatal("Failed to connect to database: ", err)
-	}
+	pool := database.MustConnectDatabase(cfg)
 
 	defer pool.Close()
 
-	switch os.Getenv("ENV") {
-	case "production":
-		gin.SetMode(gin.ReleaseMode)
-	case "staging":
-		gin.SetMode(gin.TestMode)
-	default:
-		gin.SetMode(gin.DebugMode)
+	router := router.SetupRouter(pool)
+
+	server := &http.Server{
+		Addr:    ":" + cfg.PORT,
+		Handler: router,
 	}
 
-	var router *gin.Engine = gin.Default()
+	go func() {
+		log.Printf("🚀 Server running on port %s\n", cfg.PORT)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Server error:", err)
+		}
+	}()
 
-	router.SetTrustedProxies(nil)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message":  "Todo API is running!",
-			"status":   "success",
-			"database": "connected",
-		})
-	})
+	<-quit
+	log.Println("🛑 Shutting down server...")
 
-	router.POST("/reviews", handlers.CreateReviewHandler(pool))
-	router.GET("/reviews", handlers.GetReviewsHandler(pool))
-	router.GET("/reviews/:id", handlers.GetReviewHandler(pool))
-	router.PATCH("/reviews/:id", handlers.UpdateReviewHandler(pool))
-	router.DELETE("/reviews/:id", handlers.DeleteReviewHandler(pool))
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	router.Run(":" + cfg.PORT)
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("✅ Server exited cleanly")
+
 }

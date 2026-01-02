@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"movies-backend/core/config"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -59,4 +60,20 @@ func Connect(databaseCredentials DatabaseCredentials) (*pgxpool.Pool, error) {
 	log.Println("Successfully connected to PostgreSQL database")
 
 	return pool, nil
+}
+
+func MustConnectDatabase(cfg *config.Config) *pgxpool.Pool {
+	pool, err := Connect(DatabaseCredentials{
+		DATABASE_HOST:     cfg.DATABASE_HOST,
+		DATABASE_PORT:     cfg.DATABASE_PORT,
+		DATABASE_USER:     cfg.DATABASE_USER,
+		DATABASE_PASSWORD: cfg.DATABASE_PASSWORD,
+		DATABASE_NAME:     cfg.DATABASE_NAME,
+	})
+
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+
+	return pool
 }
