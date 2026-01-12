@@ -9,4 +9,13 @@ export const createUserDTO = z
   })
   .strip();
 
+export const signInDTO = z.object({
+  email: z.email(),
+  password: z
+    .string()
+    .min(8, 'Password must have at least 8 characters')
+    .max(32, 'Password limit character is 32'),
+});
+
 export type CreateUserDTO = z.infer<typeof createUserDTO>;
+export type SignInDTO = z.infer<typeof signInDTO>;

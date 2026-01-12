@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 
-import { createUser } from '../service/auth.service.ts';
+import {
+  createUser,
+  signIn as signInService,
+} from '../service/auth.service.ts';
 
 export const signUp = async (req: Request, res: Response) => {
   const user = await createUser(req.body);
@@ -12,8 +15,12 @@ export const signUp = async (req: Request, res: Response) => {
   });
 };
 
-export const signIn = (req: Request, res: Response) => {
+export const signIn = async (req: Request, res: Response) => {
+  const user = await signInService(req.body);
+
   res.json({
-    message: 'Sign In',
+    data: {
+      user,
+    },
   });
 };

@@ -41,6 +41,7 @@ User.init(
   {
     sequelize,
     tableName: 'users',
+
     hooks: {
       beforeCreate: async (user: User) => {
         user.password = await hash(user.password, 10);
@@ -48,6 +49,15 @@ User.init(
 
       beforeUpdate: async (user: User) => {
         user.password = await hash(user.password, 10);
+      },
+    },
+
+    defaultScope: {
+      attributes: { exclude: ['password'] },
+    },
+    scopes: {
+      withPassword: {
+        attributes: { exclude: [] },
       },
     },
   }
