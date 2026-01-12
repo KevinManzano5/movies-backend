@@ -1,4 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
+import { hash } from 'bcrypt';
+
 import { sequelize } from '../database/database.ts';
 
 export class User extends Model {
@@ -39,5 +41,14 @@ User.init(
   {
     sequelize,
     tableName: 'users',
+    hooks: {
+      beforeCreate: async (user: User) => {
+        user.password = await hash(user.password, 10);
+      },
+
+      beforeUpdate: async (user: User) => {
+        user.password = await hash(user.password, 10);
+      },
+    },
   }
 );
