@@ -7,6 +7,7 @@ import {
   UserAlreadyExistsError,
 } from '../errors/auth.errors.ts';
 import { AppError } from '../errors/app.error.ts';
+import { signToken } from '../utils/jwt.ts';
 
 export const createUser = async (data: {
   firstName: string;
@@ -53,9 +54,21 @@ export const signIn = async (data: { email: string; password: string }) => {
       throw new InvalidCredentialsError();
     }
 
-    const { password, ...safeUser } = user.get({ plain: true });
+    const plainUser = user.get({ plain: true });
 
-    return safeUser;
+    delete plainUser.password;
+
+    const token = signToken({
+      sub: plainUser.id,
+      email: plainUser.email,
+    });
+
+    return {
+      data: {
+        user: plainUser,
+        token,
+      },
+    };
   } catch (error) {
     if (error instanceof AppError) {
       throw error;

@@ -18,7 +18,7 @@ export const signUp = async (req: Request, res: Response) => {
 export const signIn = async (req: Request, res: Response) => {
   const user = await signInService(req.body);
 
-  res.json({
+  res.status(200).json({
     data: {
       user,
     },
