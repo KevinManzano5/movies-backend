@@ -24,3 +24,11 @@ export const signIn = async (req: Request, res: Response) => {
     },
   });
 };
+
+export const me = async (req: Request, res: Response) => {
+  res.status(200).json({
+    data: {
+      user: (req as any).user,
+    },
+  });
+};
