@@ -8,7 +8,6 @@ import {
 } from '../errors/auth.errors.ts';
 import { AppError } from '../errors/app.error.ts';
 import { signToken } from '../utils/jwt.ts';
-import { email } from 'zod';
 
 export const signUp = async (data: {
   firstName: string;

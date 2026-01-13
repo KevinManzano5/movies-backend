@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { hash } from 'bcrypt';
 
 import { sequelize } from '../database/database.ts';
+import { UserFriend } from './userFriend.ts';
 
 export class User extends Model {
   declare id: string;
@@ -62,3 +63,10 @@ User.init(
     },
   }
 );
+
+User.belongsToMany(User, {
+  through: UserFriend,
+  as: 'friends',
+  foreignKey: 'userId',
+  otherKey: 'friendId',
+});
