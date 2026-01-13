@@ -1,12 +1,12 @@
 import type { Request, Response } from 'express';
 
 import {
-  createUser,
+  signUp as signUpService,
   signIn as signInService,
 } from '../service/auth.service.ts';
 
 export const signUp = async (req: Request, res: Response) => {
-  const user = await createUser(req.body);
+  const user = await signUpService(req.body);
 
   res.status(201).json({
     data: {

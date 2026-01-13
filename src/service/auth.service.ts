@@ -8,18 +8,31 @@ import {
 } from '../errors/auth.errors.ts';
 import { AppError } from '../errors/app.error.ts';
 import { signToken } from '../utils/jwt.ts';
+import { email } from 'zod';
 
-export const createUser = async (data: {
+export const signUp = async (data: {
   firstName: string;
   lastName?: string;
   email: string;
   password: string;
 }) => {
   try {
-    return await User.create(data);
-  } catch (error) {
-    console.error(error);
+    const user = await User.create(data);
 
+    const { password, ...plainUser } = user.get({ plain: true });
+
+    const token = signToken({
+      sub: plainUser.id,
+      email: plainUser.email,
+    });
+
+    return {
+      data: {
+        user: plainUser,
+        token,
+      },
+    };
+  } catch (error) {
     if (error instanceof UniqueConstraintError) {
       const email = error.errors?.[0]?.value as string;
 
