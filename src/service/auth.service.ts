@@ -5,6 +5,7 @@ import { User } from '../models/user.ts';
 import {
   InvalidCredentialsError,
   UserAlreadyExistsError,
+  UserNotFoundError,
 } from '../errors/auth.errors.ts';
 import { AppError } from '../errors/app.error.ts';
 import { signToken } from '../utils/jwt.ts';
@@ -26,10 +27,8 @@ export const signUp = async (data: {
     });
 
     return {
-      data: {
-        user: plainUser,
-        token,
-      },
+      user: plainUser,
+      token,
     };
   } catch (error) {
     if (error instanceof UniqueConstraintError) {
@@ -42,7 +41,7 @@ export const signUp = async (data: {
       throw new AppError(
         error.errors.map((e) => e.message).join(', '),
         400,
-        'VALIDATION_ERROR'
+        'VALIDATION_ERROR',
       );
     }
 
@@ -76,10 +75,8 @@ export const signIn = async (data: { email: string; password: string }) => {
     });
 
     return {
-      data: {
-        user: plainUser,
-        token,
-      },
+      user: plainUser,
+      token,
     };
   } catch (error) {
     if (error instanceof AppError) {
@@ -90,7 +87,33 @@ export const signIn = async (data: { email: string; password: string }) => {
       throw new AppError(
         error.errors.map((e) => e.message).join(', '),
         400,
-        'VALIDATION_ERROR'
+        'VALIDATION_ERROR',
+      );
+    }
+
+    throw new AppError('Internal server error', 500, 'INTERNAL_ERROR');
+  }
+};
+
+export const me = async (userId: string) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new UserNotFoundError(userId);
+    }
+
+    return user;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+
+    if (error instanceof ValidationError) {
+      throw new AppError(
+        error.errors.map((e) => e.message).join(', '),
+        400,
+        'VALIDATION_ERROR',
       );
     }
 

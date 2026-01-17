@@ -11,3 +11,9 @@ export class InvalidCredentialsError extends AppError {
     super(`Invalid email or password`, 401, 'INVALID CREDENTIALS');
   }
 }
+
+export class UserNotFoundError extends AppError {
+  constructor(userId: string) {
+    super(`User with id ${userId} not found`, 404, 'USER_NOT_FOUND');
+  }
+}
