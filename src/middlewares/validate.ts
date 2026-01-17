@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError, type ZodTypeAny } from 'zod';
+
 import { AppError } from '../errors/app.error.ts';
 
 type RequestProperty = 'body' | 'params' | 'query';
@@ -12,7 +13,7 @@ export const validate =
 
       req[property] = parsed as any;
 
-      next();
+      return next();
     } catch (error) {
       if (error instanceof ZodError) {
         const message = error.issues.map((e) => e.message).join(',');

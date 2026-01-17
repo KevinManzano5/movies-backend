@@ -11,6 +11,7 @@ const envSchema = z.object({
   DATABASE_PORT: z.string().transform(Number).pipe(z.number().positive()),
   DATABASE_NAME: z.string(),
   JWT_SECRET: z.string(),
+  CORS_ORIGINS: z.string(),
 });
 
 const parsed = envSchema.safeParse(process.env);
