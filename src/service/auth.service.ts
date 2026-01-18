@@ -24,6 +24,7 @@ export const signUp = async (data: {
     const token = signToken({
       sub: plainUser.id,
       email: plainUser.email,
+      isAdmin: plainUser.isAdmin,
     });
 
     return {
@@ -72,6 +73,7 @@ export const signIn = async (data: { email: string; password: string }) => {
     const token = signToken({
       sub: plainUser.id,
       email: plainUser.email,
+      isAdmin: plainUser.isAdmin,
     });
 
     return {

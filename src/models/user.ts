@@ -3,6 +3,7 @@ import { hash } from 'bcrypt';
 
 import { sequelize } from '../database/database.ts';
 import { UserFriend } from './userFriend.ts';
+import { Movie } from './movie.ts';
 
 export class User extends Model {
   declare id: string;
@@ -10,6 +11,8 @@ export class User extends Model {
   declare lastName: string;
   declare email: string;
   declare password: string;
+  declare isActive: boolean;
+  declare isAdmin: boolean;
 }
 
 User.init(
@@ -38,6 +41,14 @@ User.init(
       },
       allowNull: false,
     },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
@@ -61,7 +72,7 @@ User.init(
         attributes: { exclude: [] },
       },
     },
-  }
+  },
 );
 
 User.belongsToMany(User, {
@@ -69,4 +80,14 @@ User.belongsToMany(User, {
   as: 'friends',
   foreignKey: 'userId',
   otherKey: 'friendId',
+});
+
+Movie.belongsTo(User, {
+  foreignKey: 'createdBy',
+  as: 'creator',
+});
+
+User.hasMany(Movie, {
+  foreignKey: 'createdBy',
+  as: 'movies',
 });
