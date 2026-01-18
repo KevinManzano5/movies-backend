@@ -6,7 +6,7 @@ import { UserFriend } from '../models/userFriend.ts';
 
 export const sendFriendRequest = async (
   senderId: string,
-  receiverId: string
+  receiverId: string,
 ) => {
   if (senderId === receiverId) {
     throw new AppError('You cannot add yourself', 400, 'INVALID_FRIEND_ID');
@@ -28,7 +28,7 @@ export const sendFriendRequest = async (
 
 export const acceptFriendRequest = async (
   requestId: string,
-  userId: string
+  userId: string,
 ) => {
   await sequelize.transaction(async (t) => {
     const request = await FriendRequest.findOne({
@@ -50,7 +50,7 @@ export const acceptFriendRequest = async (
         { userId: request.senderId, friendId: request.receiverId },
         { userId: request.receiverId, friendId: request.senderId },
       ],
-      { transaction: t }
+      { transaction: t },
     );
 
     return true;
@@ -59,7 +59,7 @@ export const acceptFriendRequest = async (
 
 export const rejectFriendRequest = async (
   requestId: string,
-  userId: string
+  userId: string,
 ) => {
   const request = await FriendRequest.findOne({
     where: {
