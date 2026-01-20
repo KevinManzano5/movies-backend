@@ -4,6 +4,7 @@ import { hash } from 'bcrypt';
 import { sequelize } from '../database/database.ts';
 import { UserFriend } from './userFriend.ts';
 import { Movie } from './movie.ts';
+import { FriendRequest } from './friendRequest.ts';
 
 export class User extends Model {
   declare id: string;
@@ -90,4 +91,24 @@ Movie.belongsTo(User, {
 User.hasMany(Movie, {
   foreignKey: 'createdBy',
   as: 'movies',
+});
+
+User.hasMany(FriendRequest, {
+  foreignKey: 'senderId',
+  as: 'sentFriendRequests',
+});
+
+User.hasMany(FriendRequest, {
+  foreignKey: 'receiverId',
+  as: 'receiverFriendRequests',
+});
+
+FriendRequest.belongsTo(User, {
+  foreignKey: 'senderId',
+  as: 'sender',
+});
+
+FriendRequest.belongsTo(User, {
+  foreignKey: 'receiverId',
+  as: 'receiver',
 });

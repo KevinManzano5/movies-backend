@@ -18,10 +18,10 @@ router.post(
   '/request/:requestId/accept',
   authMiddleware,
   validate(acceptFriendRequestParamsDTO, 'params'),
-  acceptFriendRequest
+  acceptFriendRequest,
 );
 router.post('/request/:requestId/reject', rejectFriendRequest);
-router.get('/requests', getPendingFriendRequests);
+router.get('/requests', authMiddleware, getPendingFriendRequests);
 router.get('/', authMiddleware, getFriends);
 
 export default router;
