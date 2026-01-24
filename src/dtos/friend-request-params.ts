@@ -1,5 +1,5 @@
 import z from 'zod';
 
-export const acceptFriendRequestParamsDTO = z.object({
+export const acceptRejectFriendRequestParamsDTO = z.object({
   requestId: z.uuid(),
 });
