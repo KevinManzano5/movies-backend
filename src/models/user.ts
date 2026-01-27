@@ -72,6 +72,9 @@ User.init(
       withPassword: {
         attributes: { exclude: [] },
       },
+      publicProfile: {
+        attributes: ['firstName', 'lastName', 'isActive'],
+      },
     },
   },
 );
